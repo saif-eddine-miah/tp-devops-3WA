@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  web:
+    image: nginx
+    ports:
+      - "8080:80"
+    container_name: my-web-container
+
+  database:
+    image: postgres
+    container_name: my-database-container
