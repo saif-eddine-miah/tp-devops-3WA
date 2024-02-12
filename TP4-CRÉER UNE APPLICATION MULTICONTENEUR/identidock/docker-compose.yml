@@ -1,0 +1,27 @@
+services:
+  identidock:
+    build: .
+    ports:
+      - "5000:5000"
+      - "8080:8080"
+    volumes:
+      - ./app:/app
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+    networks:
+      - identinet
+
+  dnmonster:
+    image: amouat/dnmonster:1.0
+    networks:
+      - identinet
+
+  redis:
+    image: redis
+    networks:
+      - identinet
+
+networks:
+  identinet:
+    driver: bridge
