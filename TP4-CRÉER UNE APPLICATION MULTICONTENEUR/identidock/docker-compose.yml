@@ -1,27 +1,35 @@
 services:
-  identidock:
-    build: .
-    ports:
-      - "5000:5000"
-      - "8080:8080"
-    volumes:
-      - ./app:/app
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
     environment:
-      - FLASK_APP=app.py
-      - FLASK_DEBUG=1
+      - discovery.type=single-node
+      - xpack.security.enabled=false
     networks:
-      - identinet
+      - logging-network
 
-  dnmonster:
-    image: amouat/dnmonster:1.0
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.5.0
+    user: root
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - identinet
+      - logging-network
+    environment:
+      - -strict.perms=false
 
-  redis:
-    image: redis
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.5.0
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
     networks:
-      - identinet
+      - logging-network
 
 networks:
-  identinet:
+  logging-network:
     driver: bridge
